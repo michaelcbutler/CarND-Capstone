@@ -87,7 +87,7 @@ class Controller(object):
 
         elif throttle < 0.1 and vel_error < 0:  # going too fast
             decel = max(vel_error, self.decel_limit)
-            # Torque N * m
+            # Torque N * m 
             #if throttle < 0.0:
             #    rospy.logwarn("throttle: {0}, decel: {1}, ratio: {2}".format(throttle, decel, decel/throttle))
             #decel = throttle * 5
