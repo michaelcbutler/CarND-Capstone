@@ -104,3 +104,10 @@ build
 devel
 
 profile.tmp
+
+rosbags/
+
+rviz_config/
+
+ros/src/CMakeLists\.txt
+*.pb

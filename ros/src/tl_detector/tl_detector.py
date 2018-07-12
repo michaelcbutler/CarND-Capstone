@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import Int32
-from geometry_msgs.msg import PoseStamped, Pose
+from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import TrafficLightArray, TrafficLight
 from styx_msgs.msg import Lane
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from light_classification.tl_classifier import TLClassifier
 import tf
-import cv2
 import yaml
 from scipy.spatial import KDTree
-
+import time
 
 STATE_COUNT_THRESHOLD = 3
+IS_SIM = True
 
 
 class TLDetector(object):
@@ -41,6 +41,7 @@ class TLDetector(object):
         '''
         rospy.Subscriber('/vehicle/traffic_lights',
                          TrafficLightArray, self.traffic_cb)
+        # TODO CAEd: consider other image formats to feed into classifier
         rospy.Subscriber('/image_color', Image, self.image_cb)
 
         config_string = rospy.get_param("/traffic_light_config")
@@ -50,7 +51,26 @@ class TLDetector(object):
             rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
-        self.light_classifier = TLClassifier()
+        # CAEd: set up classifier
+        # full_param_name = rospy.search_param('model_location')
+        # print("Full_Param Name: %s " % full_param_name)
+        if IS_SIM:
+            model_location = rospy.get_param(
+                "/sim_model_path",
+                '../../../models/ssd_sim/frozen_inference_graph.pb')
+        else:
+            model_location = rospy.get_param(
+                "/real_model_path",
+                '../../../models/ssd_real/frozen_inference_graph.pb')
+
+        model_filter = rospy.get_param("/model_filter", 10)
+        min_score = rospy.get_param("/min_score", 0.5)
+        width = rospy.get_param("/width", 800)
+        height = rospy.get_param("/height", 600)
+        self.light_classifier =\
+            TLClassifier(model_location, model_filter,
+                         min_score, width, height)
+
         self.listener = tf.TransformListener()
 
         self.state = TrafficLight.UNKNOWN
@@ -106,6 +126,7 @@ class TLDetector(object):
         elif self.state_count >= STATE_COUNT_THRESHOLD:
             self.last_state = self.state
             line_wp = line_wp if state == TrafficLight.RED else -1
+
             self.last_wp = line_wp
             self.upcoming_red_light_pub.publish(Int32(line_wp))
         else:
@@ -123,7 +144,6 @@ class TLDetector(object):
             int: index of the closest waypoint in self.waypoints
 
         """
-        # TODO implement
         closest_dx = self.waypoint_tree.query([x, y], 1)[1]
 
         return closest_dx
@@ -137,13 +157,6 @@ class TLDetector(object):
         Returns:
             int: ID of traffic light color (specified in
             styx_msgs/TrafficLight)
-
-        """
-
-        # for testing
-        # rospy.logwarn("light state {}".format(light.state))
-        return light.state
-
         """
         if(not self.has_image):
             self.prev_light_loc = None
@@ -152,8 +165,15 @@ class TLDetector(object):
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
         # Get classification
-        return self.light_classifier.get_classification(cv_image)
-        """
+        time0 = time.time()
+        detected_state = self.light_classifier.get_classification(cv_image)
+        time1 = time.time()
+
+        print("[tl_classifer::get_classification] Time in milliseconds: ",
+              (time1 - time0) * 1000)
+        print("[tl_detector::get_light_state] Detected: %d, Actual: %d" % (
+            detected_state, light.state))
+        return detected_state
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
@@ -168,6 +188,7 @@ class TLDetector(object):
         """
         closest_light = None
         line_wp_idx = None
+        state = TrafficLight.UNKNOWN
 
         # List of positions that correspond to the line to stop in front of
         # for a given intersection

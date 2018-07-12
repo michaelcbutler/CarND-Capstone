@@ -1,3 +1,44 @@
+## Term 3: Capstone Project : System Integrations
+[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+
+In this project we develop a system which integrates multiple components to
+drive Carla, the Udacity self-driving car, around a test track.
+
+## Team Members (RoboTaxi)
+|  Name                                   | Udacity Account Email Address     |
+|:---------------------------------------:|:---------------------------------:|
+| Wubai Zhou                              |   zhouwubai@gmail.com    		  |
+| Cheryl Anne E. de la Cruz               |   cherylestacio@gmail.com         |
+| Michael Butler                          |   michaelcbutler@gmail.com        |
+| Sunil S Nandihalli                      |   sunil.nandihalli@gmail.com      |
+| Cory Yee                                |   corknelius@gmail.com            |
+
+
+## How to use
+
+Download two models for simulation and real test site seperately
+* [model on simulation](https://drive.google.com/file/d/1YP6C3o99hsf5OnrmUUOyfr1hCVe0Ki-v/view)
+* [model on real site](https://drive.google.com/open?id=1qqaZhvvibPlvZVOzsUe3Ts3EWFrdYOqz)
+
+Rename both models to `frozen_inference_graph.pb` and put them in folder `models/ssd_sim` or
+`models/ssd_real` seperately. (please create the folder if it does not exist)
+
+[//]: # (Image References)
+
+[image1]: ./imgs/components.png "Self-driving Car System Components"
+[image2]: ./imgs/ros_components.png "Carla's System Architecture"
+
+
+## Self-driving Car System Components
+
+![System Components][image1]
+
+## ROS System Components in Capstone Project
+
+![ROS Components][image2]
+
+
+
 This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
 
 Please use **one** of the two installation options, either native **or** docker installation.
@@ -24,12 +65,12 @@ Please use **one** of the two installation options, either native **or** docker 
 
 Build the docker container
 ```bash
-docker build . -t capstone
+sudo docker build . -t capstone
 ```
 
 Run the docker file
 ```bash
-docker run -p 4567:4567 -v $PWD:/capstone -v /tmp/log:/root/.ros/ --rm -it capstone
+sudo docker run -p 4567:4567 -v $PWD:/capstone -v /tmp/log:/root/.ros/ --rm -it capstone
 ```
 
 ### Port Forwarding
@@ -47,6 +88,9 @@ git clone https://github.com/udacity/CarND-Capstone.git
 cd CarND-Capstone
 pip install -r requirements.txt
 ```
+**CAEd NOTE** Make sure you're using Python2. Run `which python` to see what was set. You may need to edit your `./bashrc` file to see if a miniconda or anaconda environment is forcing you to use a specific version of python. Also see which folder your `/usr/bin/python` is pointing.
+
+
 3. Make and run styx
 ```bash
 cd ros
